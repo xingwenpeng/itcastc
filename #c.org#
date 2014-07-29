@@ -1,0 +1,104 @@
+#+LATEX_HEADER: \usepackage{xeCJK}
+#+LATEX_HEADER: \setCJKmainfont{SimSun}
+* 数据结构面试题
+** 第一篇
+*** 把二元查找树转变成排序的双向链表
+    题目：输入一棵二元查找树，将该二元查找树转换成一个排序的双向链表。要求不能创建任何新的结点，只调整指针的方向
+    
+#+begin_src c
+#include <stdio.h>
+#include <stdlib.h>
+
+struct BSTTreeNode
+{
+    int value;
+    struct BSTTreeNode *l;
+    struct BSTTreeNode *r;
+};
+struct BSTTreeNode *head = NULL;
+
+struct BSTTreeNode*NODE(int item, struct BSTTreeNode *l, struct BSTTreeNode *r)
+{
+    struct BSTTreeNode *t = malloc(sizeof *t);
+    t->value = item;
+    t->l = l; t->r = r;
+    return t;
+}
+struct BSTTreeNode *insert_node(struct BSTTreeNode *t, int value)
+{
+    if (t==NULL) return NODE(value, NULL, NULL);
+    if      (value < t->value)
+    t->l = insert_node(t->l, value);
+    else if (value > t->value)
+    t->r = insert_node(t->r, value);
+    return t;
+}
+void treetodoublelist(struct BSTTreeNode *t)
+{
+    static struct BSTTreeNode *pcurrent = NULL;
+    t->l = pcurrent;
+    if (NULL == pcurrent)
+    head = t;
+    else
+    pcurrent->r = t;
+    pcurrent = t;
+}
+void in_ord(struct BSTTreeNode *t)
+{
+    if (t==NULL) return;
+    in_ord(t->l);
+    treetodoublelist(t);
+    in_ord(t->r);
+}
+void in_ord_show(struct BSTTreeNode *t)
+{
+    if (t==NULL) return;
+    in_ord_show(t->l);
+    printf("%d\n", t->value);
+    in_ord_show(t->r);
+}
+void show_list(struct BSTTreeNode *h)
+{
+    struct BSTTreeNode *p;
+    if (h == NULL) return;
+    for (p = h; p != NULL; p = p->r)
+    printf("%d\n", p->value);
+    
+}
+int main(int argc, char *argv[])
+{
+    struct BSTTreeNode *root = NULL;
+    root = insert_node(root, 10);
+    root = insert_node(root, 6);
+    root = insert_node(root, 14);
+    root = insert_node(root, 4);
+    root = insert_node(root, 8);
+    root = insert_node(root, 12);
+    root = insert_node(root, 16);
+    //中序打印排序树
+    in_ord_show(root);
+    //排序树转换为双向链表
+    in_ord(root);
+    //遍历双向链表
+    show_list(head);
+    return 0;
+}
+ #+end_src
+*** 下排每个数都是先前上排那十个数在下排出现的次数   
+给你10分钟时间，根据上排给出十个数，在其下排填出对应的十个数   
+要求下排每个数都是先前上排那十个数在下排出现的次数。   
+
+上排的十个数如下：   
+【0，1，2，3，4，5，6，7，8，9】
+
+举一个例子，   
+
+数值: 0,1,2,3,4,5,6,7,8,9   
+
+分配: 6,2,1,0,0,0,1,0,0,0   
+
+0在下排出现了6次，1在下排出现了2次，   
+
+2在下排出现了1次，3在下排出现了0次....   
+
+以此类推..  
